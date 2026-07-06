@@ -1,0 +1,28 @@
+# Agent/planning docs — keep off public repo
+AGENT_ROLE.md
+PROJECT_SPEC.md
+
+# data — never commit real logs
+data/raw/
+data/processed/
+src/model/model.pkl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Secrets / keys
+*.key
+*.env
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Notebooks
+notebooks/.ipynb_checkpoints/
