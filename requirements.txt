@@ -1,0 +1,26 @@
+# Core
+pygetwindow==0.0.9
+pywin32>=307
+pynput==1.7.6
+flask==3.0.3
+
+# Storage & Data
+numpy>=2.0              
+pandas>=2.2.3
+sqlalchemy==2.0.30
+
+# ML
+scikit-learn>=1.6
+
+# Notifications
+plyer==2.1.0
+
+# Dashboard & Visualization
+streamlit>=1.40         
+plotly==5.22.0
+
+# Privacy
+cryptography==42.0.7        # stretch goal: DB encryption
+
+# Utilities
+pyyaml==6.0.1               # for app_categories.yaml

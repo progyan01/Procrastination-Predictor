@@ -1,0 +1,68 @@
+# App & site categories for the Procrastination Predictor
+# Used by window_tracker.py and tab_server.py to categorize activity.
+# Window titles are NEVER logged for apps in the 'excluded' category.
+
+productive:
+  apps:
+    - Code
+    - cursor
+    - pycharm
+    - notepad
+    - word
+    - excel
+    - powershell
+    - cmd
+    - terminal
+    - obsidian
+    - notion
+  sites:
+    - github.com
+    - stackoverflow.com
+    - docs.python.org
+    - leetcode.com
+    - google.com/search  # can be either, but default productive
+
+distracting:
+  apps:
+    - Spotify         # fine in short bursts, flag if long
+  sites:
+    - youtube.com
+    - reddit.com
+    - twitter.com
+    - x.com
+    - instagram.com
+    - twitch.tv
+    - netflix.com
+    - facebook.com
+    - tiktok.com
+
+neutral:
+  apps:
+    - explorer        # file explorer
+    - taskmgr
+    - settings
+  sites: []
+
+# ─── SENSITIVE / EXCLUDED ─────────────────────────────────────────────────────
+# Window title is NEVER logged for anything in this list.
+# Add anything that could leak credentials, financial data, or personal info.
+excluded:
+  apps:
+    - bitwarden
+    - keepass
+    - 1password
+    - lastpass
+    - dashlane
+    - authy           # 2FA
+    - signal
+    - whatsapp        # desktop client
+  sites:
+    - mail.google.com
+    - outlook.live.com
+    - outlook.office.com
+    - chase.com
+    - bankofamerica.com
+    - wellsfargo.com
+    - paypal.com
+    - accounts.google.com
+    - login.microsoftonline.com
