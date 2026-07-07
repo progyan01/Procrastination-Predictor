@@ -1,6 +1,7 @@
 # Core
 pygetwindow==0.0.9
 pywin32>=307
+psutil>=5.9
 pynput==1.7.6
 flask==3.0.3
 

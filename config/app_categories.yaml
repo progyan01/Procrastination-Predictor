@@ -24,21 +24,21 @@ productive:
 
 distracting:
   apps:
-    - Spotify         # fine in short bursts, flag if long
+    - Discord         # fine in short bursts, flag if long
+    - Steam
+    - Valorant
   sites:
     - youtube.com
     - reddit.com
-    - twitter.com
     - x.com
     - instagram.com
     - twitch.tv
     - netflix.com
     - facebook.com
-    - tiktok.com
 
 neutral:
   apps:
-    - explorer        # file explorer
+    - explorer       
     - taskmgr
     - settings
   sites: []
@@ -53,7 +53,7 @@ excluded:
     - 1password
     - lastpass
     - dashlane
-    - authy           # 2FA
+    - authy           
     - signal
     - whatsapp        # desktop client
   sites:
