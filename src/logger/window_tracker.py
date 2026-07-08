@@ -4,8 +4,10 @@ import psutil
 import sqlite3
 import yaml
 import time
+import os
 
 def DB_initilization():
+    os.makedirs("data/raw", exist_ok=True)
     conn = sqlite3.connect("data/raw/activity.db")
 
     conn.execute("""
@@ -19,23 +21,19 @@ def DB_initilization():
     """)
     conn.commit()
     return conn
-    #returns the connection so other functions can use it
 
 def classification(app, title):
     with open("config/app_categories.yaml", "r") as f:
         categories = yaml.safe_load(f)
 
-    app_clean = app.replace(".exe", "").lower()
-    #strip the .exe and lowercase so we can match against yaml entries
+    appName = app.replace(".exe", "").lower()
 
     for category, items in categories.items():
         for listed_app in items.get("apps", []):
-            if listed_app.lower() in app_clean:
+            if listed_app.lower() in appName:
                 return category
-            #substring match - e.g. "cursor" matches "cursor.exe"
 
     return "unknown"
-    #default if nothing in the yaml matches
 
 def insert_event(conn, window, category):
     title_to_log = window["title"] if category != "excluded" else ""
@@ -69,16 +67,14 @@ def run():
         except Exception:
             time.sleep(0.2)
             continue
-            #skip this poll if win32 throws (e.g. system window with no process)
 
         if window != previous:
-            #window changed - classify and log it
             category = classification(window["app"], window["title"])
             insert_event(conn, window, category)
             previous = window
 
         time.sleep(0.2)
-        #poll every 200ms - low CPU impact, still catches switches fast enough
+        #poll every 200ms
 
 if __name__ == "__main__":
     run()
