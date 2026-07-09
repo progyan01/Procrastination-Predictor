@@ -8,7 +8,8 @@ import os
 
 def DB_initilization():
     os.makedirs("data/raw", exist_ok=True)
-    conn = sqlite3.connect("data/raw/activity.db")
+    conn = sqlite3.connect("data/raw/activity.db", timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL")
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS window_events (
