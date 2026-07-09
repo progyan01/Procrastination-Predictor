@@ -1,0 +1,67 @@
+from flask import Flask, request
+import sqlite3
+import time
+import os
+
+app = Flask(__name__)
+
+def DB_initialization():
+    os.makedirs("data/raw", exist_ok=True)
+    conn = sqlite3.connect("data/raw/activity.db", timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL")
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS tab_events (
+            id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts      REAL,
+            url     TEXT,
+            domain  TEXT,
+            title   TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def extract_domain(url):
+    #pull just the domain out of a full URL without any external dependencies
+    try:
+        stripped = url.split("://", 1)[-1]   #drop the scheme
+        domain = stripped.split("/")[0]       #drop everything after the first slash
+        domain = domain.split("?")[0]         #drop query params if somehow still present
+        return domain.lower()
+    except Exception:
+        return url
+
+def insert_event(url, title):
+    domain = extract_domain(url)
+    conn = sqlite3.connect("data/raw/activity.db", timeout=10)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute(
+        "INSERT INTO tab_events (ts, url, domain, title) VALUES (?, ?, ?, ?)",
+        (time.time(), url, domain, title)
+    )
+    conn.commit()
+    conn.close()
+
+@app.route("/log_tab", methods=["POST"])
+def log_tab():
+    data = request.get_json(silent=True)
+    if not data:
+        return {"error": "no json"}, 400
+
+    url = data.get("url", "").strip()
+    title = data.get("title", "").strip()
+
+    if not url:
+        return {"error": "missing url"}, 400
+
+    insert_event(url, title)
+    return {"status": "ok"}, 200
+
+def run():
+    DB_initialization()
+    app.run(host="127.0.0.1", port=5001, debug=False)
+    #127.0.0.1 only — never exposed outside localhost
+
+if __name__ == "__main__":
+    run()
