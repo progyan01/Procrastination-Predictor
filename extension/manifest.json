@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Procrastinator Predictor",
+    "version": "1.0",
+    "description": "Logs active Chrome tab URL and title to the local activity tracker.",
+
+    "permissions": [
+        "tabs",
+        "activeTab"
+    ],
+
+    "host_permissions": [
+        "http://localhost:5001/*"
+    ],
+
+    "background": {
+        "service_worker": "background.js"
+    }
+}
