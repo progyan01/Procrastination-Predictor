@@ -2,6 +2,7 @@ from flask import Flask, request
 import sqlite3
 import time
 import os
+import yaml
 
 app = Flask(__name__)
 
@@ -12,15 +13,29 @@ def DB_initialization():
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tab_events (
-            id      INTEGER PRIMARY KEY AUTOINCREMENT,
-            ts      REAL,
-            url     TEXT,
-            domain  TEXT,
-            title   TEXT
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts       REAL,
+            url      TEXT,
+            domain   TEXT,
+            title    TEXT,
+            category TEXT
         )
     """)
+    try:
+        conn.execute("ALTER TABLE tab_events ADD COLUMN category TEXT")
+    except Exception:
+        pass  #column already exists
     conn.commit()
     conn.close()
+
+def categorize_url(domain):
+    with open("config/app_categories.yaml", "r") as f:
+        categories = yaml.safe_load(f)
+    for category, items in categories.items():
+        for site in items.get("sites", []):
+            if site in domain:
+                return category
+    return "unknown"
 
 def extract_domain(url):
     #pull just the domain out of a full URL without any external dependencies
@@ -34,11 +49,25 @@ def extract_domain(url):
 
 def insert_event(url, title):
     domain = extract_domain(url)
+    category = categorize_url(domain)
+    now = time.time()
     conn = sqlite3.connect("data/raw/activity.db", timeout=10)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute(
-        "INSERT INTO tab_events (ts, url, domain, title) VALUES (?, ?, ?, ?)",
-        (time.time(), url, domain, title)
+        "INSERT INTO tab_events (ts, url, domain, title, category) VALUES (?, ?, ?, ?, ?)",
+        (now, url, domain, title, category)
+    )
+    #update the most recent chrome window_event so the feature pipeline sees the real category
+    conn.execute(
+        """
+        UPDATE window_events SET category = ?
+        WHERE id = (
+            SELECT id FROM window_events
+            WHERE app_name LIKE '%chrome%'
+            ORDER BY ts DESC LIMIT 1
+        )
+        """,
+        (category,)
     )
     conn.commit()
     conn.close()
