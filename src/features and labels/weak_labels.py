@@ -10,35 +10,38 @@ LOOKAHEAD       = 900    #seconds to look forward for distracting spiral (15 min
 PRODUCTIVE_MIN  = 0.5    #fraction of lookback window that must be productive
 DISTRACTING_MIN = 0.6    #fraction of lookahead window that must be distracting
 
-def productive_before(conn, ts):
+def _duration_ratios(conn, start, end):
+    #each event lasts from its ts until the next event's ts
+    #use LEAD to compute per-row durations, then sum by category
     row = conn.execute(
         """
-        SELECT COUNT(*) AS total,
-               SUM(CASE WHEN category = 'productive' THEN 1 ELSE 0 END) AS productive
-        FROM window_events WHERE ts > ? AND ts <= ?
+        WITH durations AS (
+            SELECT category,
+                   LEAD(ts) OVER (ORDER BY ts) - ts AS duration
+            FROM window_events
+            WHERE ts >= ? AND ts < ?
+        )
+        SELECT
+            SUM(CASE WHEN category IN ('productive', 'distracting', 'neutral') THEN duration ELSE 0 END) AS known_total,
+            SUM(CASE WHEN category = 'productive'  THEN duration ELSE 0 END) AS productive_time,
+            SUM(CASE WHEN category = 'distracting' THEN duration ELSE 0 END) AS distracting_time
+        FROM durations
         """,
-        (ts - LOOKBACK, ts)
+        (start, end)
     ).fetchone()
+    return row  #(known_total, productive_time, distracting_time)
 
-    total, productive = row
-    if not total:
+def productive_before(conn, ts):
+    known_total, productive_time, _ = _duration_ratios(conn, ts - LOOKBACK, ts)
+    if not known_total:
         return False
-    return (productive / total) >= PRODUCTIVE_MIN
+    return (productive_time / known_total) >= PRODUCTIVE_MIN
 
 def distracting_after(conn, ts):
-    row = conn.execute(
-        """
-        SELECT COUNT(*) AS total,
-               SUM(CASE WHEN category = 'distracting' THEN 1 ELSE 0 END) AS distracting
-        FROM window_events WHERE ts > ? AND ts <= ?
-        """,
-        (ts, ts + LOOKAHEAD)
-    ).fetchone()
-
-    total, distracting = row
-    if not total:
+    known_total, _, distracting_time = _duration_ratios(conn, ts, ts + LOOKAHEAD)
+    if not known_total:
         return False
-    return (distracting / total) >= DISTRACTING_MIN
+    return (distracting_time / known_total) >= DISTRACTING_MIN
 
 def label_events(conn):
     #stamp every window event with 1 if it marks the start of a procrastination spiral, 0 otherwise
