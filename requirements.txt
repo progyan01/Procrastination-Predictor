@@ -14,7 +14,7 @@ sqlalchemy==2.0.30
 scikit-learn>=1.6
 
 # Notifications
-plyer==2.1.0
+win11toast>=0.34
 
 # Dashboard & Visualization
 streamlit>=1.40         
