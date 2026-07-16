@@ -16,6 +16,10 @@ scikit-learn>=1.6
 # Notifications
 win11toast>=0.34
 
+# System tray launcher
+pystray>=0.19
+Pillow>=10.0
+
 # Dashboard & Visualization
 streamlit>=1.40         
 plotly==5.22.0
