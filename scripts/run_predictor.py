@@ -16,7 +16,7 @@ from notifier import send_nudge, init_nudge_log
 DB_PATH         = "data/raw/activity.db"
 MODEL_PATH      = "src/model/model.pkl"
 NUDGE_THRESHOLD = 0.6
-POLL_INTERVAL   = 300   # seconds between prediction checks (5 min)
+POLL_INTERVAL   = 120   # seconds between prediction checks (2 min)
 FEATURES        = [
     "time_since_break",
     "switch_freq_10m",
