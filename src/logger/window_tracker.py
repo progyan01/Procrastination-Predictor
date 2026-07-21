@@ -5,6 +5,7 @@ import sqlite3
 import yaml
 import time
 import os
+from redaction import redact
 
 def DB_initilization():
     os.makedirs("data/raw", exist_ok=True)
@@ -37,8 +38,10 @@ def classification(app, title):
     return "unknown"
 
 def insert_event(conn, window, category):
-    title_to_log = window["title"] if category != "excluded" else ""
-    #never store the window title for sensitive/excluded apps
+    if category == "excluded":
+        title_to_log = ""   #never store title for sensitive/excluded apps
+    else:
+        title_to_log = redact(window["title"])
 
     conn.execute(
         "INSERT INTO window_events (ts, app_name, title, category) VALUES (?, ?, ?, ?)",

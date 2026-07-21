@@ -3,6 +3,7 @@ import sqlite3
 import time
 import os
 import yaml
+from redaction import redact
 
 app = Flask(__name__)
 
@@ -55,7 +56,7 @@ def insert_event(url, title):
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute(
         "INSERT INTO tab_events (ts, url, domain, title, category) VALUES (?, ?, ?, ?, ?)",
-        (now, url, domain, title, category)
+        (now, redact(url), domain, redact(title), category)
     )
     #update the most recent chrome window_event so the feature pipeline sees the real category
     conn.execute(
