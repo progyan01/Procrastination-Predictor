@@ -6,10 +6,12 @@ import sys
 
 import pandas as pd
 
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "features and labels"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "dashboard"))
 # pyrefly: ignore [missing-import]
-from src.features_and_labels.feature_engineering import compute_features
-from src.dashboard.notifier import send_nudge, init_nudge_log
+from feature_engineering import compute_features
+# pyrefly: ignore [missing-import]
+from notifier import send_nudge, init_nudge_log
 
 DB_PATH         = "data/raw/activity.db"
 MODEL_PATH      = "src/model/model.pkl"
