@@ -27,3 +27,4 @@ venv/
 # Notebooks
 notebooks/.ipynb_checkpoints/
 scripts/backfill_categories.py
+scripts/compare_models.py
