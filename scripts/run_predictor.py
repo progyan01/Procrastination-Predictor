@@ -17,6 +17,9 @@ DB_PATH         = "data/raw/activity.db"
 MODEL_PATH      = "src/model/model.pkl"
 NUDGE_THRESHOLD = 0.6
 POLL_INTERVAL   = 120   # seconds between prediction checks (2 min)
+SWITCH_FREQ_WEIGHT   = 0.25
+SWITCH_FREQ_HIGH     = 20   # switches/10min that counts as "fully active" distraction
+
 FEATURES        = [
     "time_since_break",
     "switch_freq_10m",
@@ -49,7 +52,12 @@ def heuristic_score(features):
 def get_score(model, mode, features):
     if mode == "ml":
         X = pd.DataFrame([features])[FEATURES]
-        return model.predict_proba(X)[0][1]   #probability of class 1
+        ml_prob = model.predict_proba(X)[0][1]
+        if SWITCH_FREQ_WEIGHT > 0:
+            raw_switchFreq = features["switch_freq_10m"]
+            score = (1 - SWITCH_FREQ_WEIGHT) * ml_prob + SWITCH_FREQ_WEIGHT * (min(raw_switchFreq / SWITCH_FREQ_HIGH, 1.0))
+            return score
+        return ml_prob
     return heuristic_score(features)
 
 def main():
