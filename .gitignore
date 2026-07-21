@@ -5,7 +5,7 @@ PROJECT_SPEC.md
 # data — never commit real logs
 data/raw/
 data/processed/
-src/model/model.pkl
+*.pkl
 
 # Python
 __pycache__/
