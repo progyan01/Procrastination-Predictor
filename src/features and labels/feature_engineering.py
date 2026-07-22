@@ -26,17 +26,23 @@ def switch_freq_10m(conn, at_time):
     return row[0]
 
 def category_ratios_30m(conn, at_time):
-    #compute productive and distracting ratios in a single query to avoid two round-trips to the DB
+    #compute productive and distracting ratios weighted by time spent, not event count
+    #each event lasts from its ts until the next event (via LEAD); the last event extends to at_time
     row = conn.execute(
         """
+        WITH durations AS (
+            SELECT category,
+                   COALESCE(LEAD(ts) OVER (ORDER BY ts), ?) - ts AS duration
+            FROM window_events
+            WHERE ts > ? AND ts <= ?
+        )
         SELECT
-            COUNT(*) AS total,
-            SUM(CASE WHEN category = 'productive'  THEN 1 ELSE 0 END) AS productive,
-            SUM(CASE WHEN category = 'distracting' THEN 1 ELSE 0 END) AS distracting
-        FROM window_events
-        WHERE ts > ? AND ts <= ?
+            SUM(duration) AS total,
+            SUM(CASE WHEN category = 'productive'  THEN duration ELSE 0 END) AS productive,
+            SUM(CASE WHEN category = 'distracting' THEN duration ELSE 0 END) AS distracting
+        FROM durations
         """,
-        (at_time - WINDOW_30MINS, at_time)
+        (at_time, at_time - WINDOW_30MINS, at_time)
     ).fetchone()
 
     total, productive, distracting = row
