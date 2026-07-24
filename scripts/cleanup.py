@@ -5,9 +5,8 @@ import time
 import logging
 from datetime import datetime
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "features and labels"))
-# pyrefly: ignore [missing-import]
-from weak_labels import productive_before, distracting_after
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.features_and_labels.weak_labels import productive_before, distracting_after
 
 DB_PATH  = os.path.join(os.path.dirname(__file__), "..", "data", "raw", "activity.db")
 LOG_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "cleanup.log")

@@ -15,23 +15,14 @@ from sklearn.metrics import (
 )
 from sklearn.calibration import CalibratedClassifierCV
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "features and labels"))
-# pyrefly: ignore [missing-import]
-from weak_labels import build_training_dataset
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.features_and_labels.weak_labels import build_training_dataset
+from src.features_and_labels.feature_engineering import FEATURES
 
 DB_PATH         = "data/raw/activity.db"
 MODEL_PATH      = "src/model/model.pkl"
 N_SPLITS        = 5
 NUDGE_THRESHOLD = 0.6
-FEATURES = [
-    "time_since_break",
-    "switch_freq_10m",
-    "productive_ratio_30m",
-    "distracting_ratio_30m",
-    "task_streak_seconds",
-    "hour_of_day",
-    "day_of_week",
-]
 
 
 def load_dataset(conn):

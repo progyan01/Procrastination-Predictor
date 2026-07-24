@@ -5,22 +5,12 @@ import sys
 
 import pandas as pd
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "features and labels"))
-# pyrefly: ignore [missing-import]
-from feature_engineering import compute_features
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+from src.features_and_labels.feature_engineering import compute_features, FEATURES
 
 DB_PATH         = "data/raw/activity.db"
 MODEL_PATH      = "src/model/model.pkl"
 NUDGE_THRESHOLD = 0.6
-FEATURES        = [
-    "time_since_break",
-    "switch_freq_10m",
-    "productive_ratio_30m",
-    "distracting_ratio_30m",
-    "task_streak_seconds",
-    "hour_of_day",
-    "day_of_week",
-]
 
 def load_model():
     with open(MODEL_PATH, "rb") as f:

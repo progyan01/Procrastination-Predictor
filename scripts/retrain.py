@@ -13,11 +13,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score, precision_score, recall_score, classification_report
 from sklearn.calibration import CalibratedClassifierCV
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "features and labels"))
-# pyrefly: ignore [missing-import]
-from weak_labels import build_training_dataset
-# pyrefly: ignore [missing-import]
-from feature_engineering import compute_features
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.features_and_labels.weak_labels import build_training_dataset
+from src.features_and_labels.feature_engineering import compute_features, FEATURES
 
 BASE_DIR   = os.path.join(os.path.dirname(__file__), "..")
 DB_PATH    = os.path.join(BASE_DIR, "data", "raw", "activity.db")
@@ -32,16 +30,6 @@ NUDGE_THRESHOLD    = 0.6   # operating threshold for the nudge system
 RANDOM_STATE       = 42
 NUDGE_SAMPLE_WEIGHT = 3.0  # confirmed nudge responses count 3x vs weak labels
 NUDGE_RETENTION    = 14 * 86400  # only use nudges within raw-data window (14 days)
-
-FEATURES = [
-    "time_since_break",
-    "switch_freq_10m",
-    "productive_ratio_30m",
-    "distracting_ratio_30m",
-    "task_streak_seconds",
-    "hour_of_day",
-    "day_of_week",
-]
 
 logging.basicConfig(
     filename=LOG_PATH,
