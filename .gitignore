@@ -1,5 +1,4 @@
 # Planning docs
-AGENT_ROLE.md
 PROJECT_SPEC.md
 
 # Data
@@ -26,4 +25,4 @@ venv/
 # Scripts/Logs
 scripts/backfill_categories.py
 scripts/compare_models.py
-data/retrain.log
+*.log
