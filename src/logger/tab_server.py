@@ -29,10 +29,14 @@ def DB_initialization():
     conn.commit()
     conn.close()
 
-def categorize_url(domain):
+def _load_categories():
     with open("config/app_categories.yaml", "r") as f:
-        categories = yaml.safe_load(f)
-    for category, items in categories.items():
+        return yaml.safe_load(f)
+
+_CATEGORIES = _load_categories()
+
+def categorize_url(domain):
+    for category, items in _CATEGORIES.items():
         for site in items.get("sites", []):
             if site in domain:
                 return category

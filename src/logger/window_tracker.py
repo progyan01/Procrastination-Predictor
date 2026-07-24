@@ -27,13 +27,16 @@ def DB_initilization():
     conn.commit()
     return conn
 
-def classification(app, title):
+def _load_categories():
     with open("config/app_categories.yaml", "r") as f:
-        categories = yaml.safe_load(f)
+        return yaml.safe_load(f)
 
+_CATEGORIES = _load_categories()
+
+def classification(app, title):
     appName = app.replace(".exe", "").lower()
 
-    for category, items in categories.items():
+    for category, items in _CATEGORIES.items():
         for listed_app in items.get("apps", []):
             if listed_app.lower() in appName:
                 return category
