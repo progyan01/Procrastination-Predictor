@@ -1,13 +1,11 @@
 import sqlite3
-import sys
-import os
 
-sys.path.insert(0, os.path.dirname(__file__))
-from feature_engineering import compute_features
+from .feature_engineering import compute_features
 
-LOOKBACK        = 1800   #seconds to look back for productive activity (30 min)
+LOOKBACK        = 1800   #seconds to look back for recent activity (30 min)
 LOOKAHEAD       = 900    #seconds to look forward for distracting spiral (15 min)
-PRODUCTIVE_MIN  = 0.5    #fraction of lookback window that must be productive
+LABEL_GAP       = 300    #seconds gap between features and label window to prevent leakage
+DISTRACTING_MAX = 0.4    #if distracting ratio in lookback exceeds this, user is already distracted — skip
 DISTRACTING_MIN = 0.6    #fraction of lookahead window that must be distracting
 
 def _duration_ratios(conn, start, end):
@@ -31,17 +29,25 @@ def _duration_ratios(conn, start, end):
     ).fetchone()
     return row  #(known_total, productive_time, distracting_time)
 
-def productive_before(conn, ts):
-    known_total, productive_time, _ = _duration_ratios(conn, ts - LOOKBACK, ts)
+def not_already_distracted(conn, ts):
+    #softer check: the user was NOT already deep in distraction during the lookback
+    #this catches productive->distracting AND neutral->distracting transitions
+    known_total, _, distracting_time = _duration_ratios(conn, ts - LOOKBACK, ts)
     if not known_total:
         return False
-    return (productive_time / known_total) >= PRODUCTIVE_MIN
+    return (distracting_time / known_total) < DISTRACTING_MAX
 
 def distracting_after(conn, ts):
-    known_total, _, distracting_time = _duration_ratios(conn, ts, ts + LOOKAHEAD)
+    #label window starts LABEL_GAP seconds after ts to avoid overlap with the feature window
+    gap_start = ts + LABEL_GAP
+    known_total, _, distracting_time = _duration_ratios(conn, gap_start, gap_start + LOOKAHEAD)
     if not known_total:
         return False
     return (distracting_time / known_total) >= DISTRACTING_MIN
+
+# keep the old name around for cleanup.py which imports it directly
+def productive_before(conn, ts):
+    return not_already_distracted(conn, ts)
 
 def label_events(conn):
     #stamp every window event with 1 if it marks the start of a procrastination spiral, 0 otherwise
@@ -51,7 +57,7 @@ def label_events(conn):
 
     results = []
     for ts in timestamps:
-        label = 1 if (productive_before(conn, ts) and distracting_after(conn, ts)) else 0
+        label = 1 if (not_already_distracted(conn, ts) and distracting_after(conn, ts)) else 0
         results.append({"ts": ts, "label": label})
 
     return results

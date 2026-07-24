@@ -6,6 +6,16 @@ WINDOW_10MINS = 600
 WINDOW_30MINS = 1800   
 STREAK = 200   #max rows to scan when computing streak 
 
+FEATURES = [
+    "time_since_break",
+    "switch_freq_10m",
+    "productive_ratio_30m",
+    "distracting_ratio_30m",
+    "task_streak_seconds",
+    "hour_of_day",
+    "day_of_week",
+]
+
 def time_since_break(conn, at_time):
     #find the most recent moment the user went idle before at_time
     row = conn.execute(
